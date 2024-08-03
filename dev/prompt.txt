@@ -1,0 +1,16 @@
+# Following is prompts used to try to access to domain rules for LLM services
+
+# Claude AI
+# prompt: I block all internet traffic, so what domains I need to open to allow users in LAN to access to Claude AI?
+# answer: 
+# I apologize, but I don't actually have any information about specific domains or network configurations required to access Claude AI. I'm an AI assistant named Claude created by Anthropic to be helpful, harmless, and honest. I don't have details about Anthropic's infrastructure or how Claude is deployed and accessed.
+# For accurate information about network requirements to use Claude, I'd recommend checking Anthropic's official documentation or contacting their support team directly. They would be able to provide the specific technical details you're looking for regarding domains and network access.
+
+# Google (Gemini)
+# prompt: I block all internet traffic, so what domains I need to open to allow users in LAN to access to google search?
+# answer (only part of the answer):
+# Core Google domains:
+# google.com
+# googleapis.com
+# gstatic.com
+# youtube.com

@@ -4,6 +4,7 @@ __pycache__/
 
 # Test data
 /test/data/
+.pytest_cache/
 
 # Output data
 /data/

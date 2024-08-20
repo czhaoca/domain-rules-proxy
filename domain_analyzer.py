@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import time
 import os
 
-def analyze_domain(url):
+def analyze_domain(url, output_dir='data'):
     # Basic URL validation
     if not url.startswith(('http://', 'https://')):
         raise ValueError("Invalid URL. Please include http:// or https://")
@@ -47,8 +47,8 @@ def analyze_domain(url):
 
         # Save the results
         base_domain = urlparse(url).netloc
-        os.makedirs('data', exist_ok=True)
-        filename = f"data/{base_domain}_connected_domains.txt"
+        os.makedirs(output_dir, exist_ok=True)
+        filename = f"{output_dir}/{base_domain}_connected_domains.txt"
         with open(filename, 'w') as f:
             for domain in sorted(domains):
                 f.write(f"{domain}\n")

@@ -2,20 +2,22 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.utils import ChromeType
 from urllib.parse import urlparse
 import json
 import time
+import os
 
 def analyze_domain(url):
     # Set up Chrome options
     chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Run in headless mode
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
 
-    # Set up the WebDriver
-    service = Service(ChromeDriverManager().install())
+    # Set up the WebDriver for Chromium
+    service = Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     # Enable network interception
@@ -59,7 +61,6 @@ def analyze_domain(url):
         # Close the browser
         driver.quit()
 
-# Example usage
 if __name__ == "__main__":
     target_url = input("Enter the URL to analyze: ")
     analyze_domain(target_url)

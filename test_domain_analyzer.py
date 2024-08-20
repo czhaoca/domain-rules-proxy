@@ -1,53 +1,57 @@
-import unittest
+import pytest
 from unittest.mock import patch, MagicMock
 from domain_analyzer import analyze_domain
 import os
 
-class TestDomainAnalyzer(unittest.TestCase):
-
-    @patch('domain_analyzer.webdriver.Chrome')
-    @patch('domain_analyzer.Service')
-    def test_analyze_domain(self, mock_service, mock_chrome):
-        # Mock the WebDriver and its methods
+@pytest.fixture
+def mock_webdriver():
+    with patch('domain_analyzer.webdriver.Chrome') as mock_chrome:
         mock_driver = MagicMock()
         mock_chrome.return_value = mock_driver
+        yield mock_driver
 
-        # Mock the requests captured by the WebDriver
-        mock_requests = [
-            {'url': 'https://example.com/page'},
-            {'url': 'https://cdn.example.com/style.css'},
-            {'url': 'https://api.example.com/data'},
-            {'url': 'https://ads.thirdparty.com/ad'},
-        ]
-        mock_driver.execute_cdp_cmd.return_value = mock_requests
+@pytest.fixture
+def mock_service():
+    with patch('domain_analyzer.Service') as mock_service:
+        yield mock_service
 
-        # Run the analysis
-        test_url = 'https://example.com'
-        analyze_domain(test_url)
+def test_analyze_domain(mock_webdriver, mock_service):
+    # Mock the requests captured by the WebDriver
+    mock_requests = [
+        {'url': 'https://example.com/page'},
+        {'url': 'https://cdn.example.com/style.css'},
+        {'url': 'https://api.example.com/data'},
+        {'url': 'https://ads.thirdparty.com/ad'},
+    ]
+    mock_webdriver.execute_cdp_cmd.return_value = mock_requests
 
-        # Check if the file was created
-        expected_filename = 'example.com_connected_domains.txt'
-        self.assertTrue(os.path.exists(expected_filename))
+    # Run the analysis
+    test_url = 'https://example.com'
+    analyze_domain(test_url)
 
-        # Check the contents of the file
-        with open(expected_filename, 'r') as f:
-            content = f.read().splitlines()
+    # Check if the file was created
+    expected_filename = 'example.com_connected_domains.txt'
+    assert os.path.exists(expected_filename)
 
-        expected_domains = [
-            'example.com',
-            'cdn.example.com',
-            'api.example.com',
-            'ads.thirdparty.com'
-        ]
+    # Check the contents of the file
+    with open(expected_filename, 'r') as f:
+        content = f.read().splitlines()
 
-        self.assertEqual(set(content), set(expected_domains))
+    expected_domains = [
+        'example.com',
+        'cdn.example.com',
+        'api.example.com',
+        'ads.thirdparty.com'
+    ]
 
-        # Clean up the created file
-        os.remove(expected_filename)
+    assert set(content) == set(expected_domains)
 
-    def test_invalid_url(self):
-        with self.assertRaises(Exception):
-            analyze_domain('not_a_valid_url')
+    # Clean up the created file
+    os.remove(expected_filename)
+
+def test_invalid_url(mock_webdriver, mock_service):
+    with pytest.raises(Exception):
+        analyze_domain('not_a_valid_url')
 
 if __name__ == '__main__':
-    unittest.main()
+    pytest.main()

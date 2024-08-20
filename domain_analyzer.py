@@ -2,13 +2,16 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.utils import ChromeType
+from webdriver_manager.core.os_manager import ChromeType
 from urllib.parse import urlparse
-import json
 import time
 import os
 
 def analyze_domain(url):
+    # Basic URL validation
+    if not url.startswith(('http://', 'https://')):
+        raise ValueError("Invalid URL. Please include http:// or https://")
+
     # Set up Chrome options
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -23,15 +26,16 @@ def analyze_domain(url):
     # Enable network interception
     driver.execute_cdp_cmd("Network.enable", {})
 
-    # Create a list to store the requests
-    requests = []
+    # Create a set to store the domains
+    domains = set()
 
     # Define a callback to capture network requests
     def capture_request(request):
-        requests.append(request)
+        parsed_url = urlparse(request['url'])
+        if parsed_url.netloc:
+            domains.add(parsed_url.netloc)
 
     # Add the listener
-    driver.execute_cdp_cmd("Network.setRequestInterception", {"patterns": [{"urlPattern": "*"}]})
     driver.on_request = capture_request
 
     try:
@@ -41,13 +45,6 @@ def analyze_domain(url):
         # Wait for the page to load (adjust the time as needed)
         time.sleep(5)
 
-        # Process the captured requests
-        domains = set()
-        for request in requests:
-            parsed_url = urlparse(request['url'])
-            if parsed_url.netloc:
-                domains.add(parsed_url.netloc)
-
         # Save the results
         base_domain = urlparse(url).netloc
         filename = f"{base_domain}_connected_domains.txt"
@@ -56,6 +53,7 @@ def analyze_domain(url):
                 f.write(f"{domain}\n")
 
         print(f"Analysis complete. Results saved to {filename}")
+        return domains  # Return the set of domains for testing purposes
 
     finally:
         # Close the browser
@@ -63,4 +61,7 @@ def analyze_domain(url):
 
 if __name__ == "__main__":
     target_url = input("Enter the URL to analyze: ")
-    analyze_domain(target_url)
+    try:
+        analyze_domain(target_url)
+    except ValueError as e:
+        print(f"Error: {e}")

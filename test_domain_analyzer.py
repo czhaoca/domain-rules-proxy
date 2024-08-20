@@ -1,7 +1,12 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from domain_analyzer import analyze_domain
 import os
+import sys
+
+# Add the parent directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from domain_analyzer import analyze_domain
 
 @pytest.fixture
 def mock_webdriver():
@@ -40,7 +45,7 @@ def test_analyze_domain(mock_webdriver, mock_service):
     domains = analyze_domain(test_url)
 
     # Check if the file was created
-    expected_filename = 'example.com_connected_domains.txt'
+    expected_filename = 'data/example.com_connected_domains.txt'
     assert os.path.exists(expected_filename)
 
     # Check the contents of the file
@@ -59,6 +64,7 @@ def test_analyze_domain(mock_webdriver, mock_service):
 
     # Clean up the created file
     os.remove(expected_filename)
+    os.rmdir('data')
 
 def test_invalid_url(mock_webdriver, mock_service):
     with pytest.raises(ValueError, match="Invalid URL. Please include http:// or https://"):

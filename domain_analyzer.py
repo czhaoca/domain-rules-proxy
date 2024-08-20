@@ -47,7 +47,8 @@ def analyze_domain(url):
 
         # Save the results
         base_domain = urlparse(url).netloc
-        filename = f"{base_domain}_connected_domains.txt"
+        os.makedirs('data', exist_ok=True)
+        filename = f"data/{base_domain}_connected_domains.txt"
         with open(filename, 'w') as f:
             for domain in sorted(domains):
                 f.write(f"{domain}\n")

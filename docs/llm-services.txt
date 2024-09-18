@@ -18,3 +18,16 @@ www.bing.com
 copilot.microsoft.com
 login.live.com
 login.microsoftonline.com
+
+#claude.ai
+claude.ai
+api.claude.ai
+s-cdn.anthropic.com
+statsig.anthropic.com
+s-cdn.anthropic.com
+www.google.com
+accounts.google.com
+js.intercomcdn.com
+www.gstatic.com
+widget.intercom.io
+www.claudeusercontent.com

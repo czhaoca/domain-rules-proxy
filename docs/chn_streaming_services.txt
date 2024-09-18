@@ -1,6 +1,7 @@
 # v.qq.com
 vfiles.gtimg.cn
 vm.gtimg.cn
+i.gtimg.cn
 pgdt.gtimg.cn
 v.qq.com
 res.ab.qq.com
@@ -15,12 +16,16 @@ h.trace.qq.com
 beacon.cdn.qq.com
 oth.str.beacon.qq.com
 otheve.beacon.qq.com
+wuji.video.qq.com
 cache.wuji.qq.com
 iwan-s.video.qq.com
 config.ab.qq.com
 vd6.l.qq.com
+livep.l.qq.com
 appcfg.v.qq.com
 iwan.video.qq.com
+rpt.gdt.qq.com
+vr.gdt.qq.com
 puui.qpic.cn
 media-img.puui.qpic.cn
 tv.puui.qpic.cn

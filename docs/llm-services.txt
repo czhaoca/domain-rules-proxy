@@ -11,3 +11,10 @@ bing.com
 cdn.oaistatic.com
 chatgpt.com
 ab.chatgpt.com
+
+#copilot.microsoft.com
+r.bing.com
+www.bing.com
+copilot.microsoft.com
+login.live.com
+login.microsoftonline.com

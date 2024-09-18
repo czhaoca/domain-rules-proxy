@@ -1,2 +1,8 @@
+# netflix.com
+cdn.cookielaw.org
+assets.nflxext.com
 netflix.com
-nflxvideo.net
+www.netflix.com
+logs.netflix.com
+ae.nflximg.net
+geolocation.onetrust.com

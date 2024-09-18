@@ -6,3 +6,8 @@ chatgpt.com
 claude.ai
 copilot.microsoft.com
 bing.com
+
+#chatgpt.com
+cdn.oaistatic.com
+chatgpt.com
+ab.chatgpt.com

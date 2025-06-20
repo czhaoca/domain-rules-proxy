@@ -19,7 +19,9 @@ The tool uses Selenium WebDriver with Chrome in headless mode to simulate real b
 - Simulates realistic browser behavior including JavaScript execution
 - Captures all network requests during page load and user interactions
 - Extracts unique domains and IP addresses from captured traffic
-- Generates whitelist-ready domain and IP lists
+- Resolves domains to IPv4 and IPv6 addresses using DNS lookups
+- Handles direct IP connections and domain-based connections separately
+- Generates whitelist-ready domain and IP lists with timestamp information
 - Supports batch analysis of multiple target websites
 - Exports results in firewall-friendly formats
 
@@ -102,7 +104,8 @@ domain-rules-proxy/
 
 3. The script will simulate browser behavior and capture all network requests, then save results in the `data` folder:
    - `[analyzed_domain]_connected_domains.txt` - List of all domains accessed
-   - Future versions will include IP addresses and firewall rule formats
+   - `[analyzed_domain]_connected_ips.txt` - IP addresses resolved from domains and direct connections
+   - `[analyzed_domain]_domain_ip_mapping.txt` - Combined mapping of domains to their IP addresses
 
 ### Example Use Cases
 
@@ -110,7 +113,10 @@ domain-rules-proxy/
 ```bash
 python3 domain_analyzer.py
 # Enter: https://www.google.com
-# Output: google.com_connected_domains.txt with all required domains
+# Output: 
+#   - google.com_connected_domains.txt with all required domains
+#   - google.com_connected_ips.txt with resolved IP addresses
+#   - google.com_domain_ip_mapping.txt with domain-to-IP mappings
 ```
 
 **Corporate Network Setup:**

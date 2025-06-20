@@ -8,7 +8,10 @@ import socket
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from domain_analyzer import analyze_domain, capture_request, resolve_domain_to_ips, resolve_domains_to_ips
+from domain_analyzer import (
+    analyze_domain, capture_request, resolve_domain_to_ips, resolve_domains_to_ips,
+    detect_page_type, simulate_scroll_interactions, simulate_user_interactions
+)
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -35,7 +38,8 @@ def mock_service():
         yield mock_service
 
 @patch('domain_analyzer.resolve_domains_to_ips')
-def test_analyze_domain(mock_resolve_ips, mock_webdriver, mock_service, setup_teardown):
+@patch('domain_analyzer.simulate_user_interactions')
+def test_analyze_domain(mock_interactions, mock_resolve_ips, mock_webdriver, mock_service, setup_teardown):
     # Mock the requests that will be captured by CDP (including one direct IP)
     mock_requests = [
         {'request': {'url': 'https://example.com/page'}},
@@ -45,6 +49,9 @@ def test_analyze_domain(mock_resolve_ips, mock_webdriver, mock_service, setup_te
         {'request': {'url': 'https://ads.thirdparty.com/ad'}},
     ]
 
+    # Mock user interactions to return success
+    mock_interactions.return_value = True
+    
     # Mock DNS resolution
     mock_resolve_ips.return_value = {
         'example.com': {'ipv4': ['93.184.216.34'], 'ipv6': ['2606:2800:220:1:248:1893:25c8:1946']},
@@ -77,9 +84,9 @@ def test_analyze_domain(mock_resolve_ips, mock_webdriver, mock_service, setup_te
     mock_webdriver.execute_cdp_cmd = mock_execute_cdp_cmd
     mock_webdriver.get = mock_driver_get
 
-    # Run the analysis
+    # Run the analysis with interaction level none to avoid complex mocking
     test_url = 'https://example.com'
-    result = analyze_domain(test_url, output_dir=TEST_DATA_DIR)
+    result = analyze_domain(test_url, output_dir=TEST_DATA_DIR, interaction_level='none')
 
     # Check if files were created
     domains_filename = os.path.join(TEST_DATA_DIR, 'example.com_connected_domains.txt')
@@ -117,7 +124,7 @@ def test_analyze_domain(mock_resolve_ips, mock_webdriver, mock_service, setup_te
 
 def test_invalid_url(mock_webdriver, mock_service, setup_teardown):
     with pytest.raises(ValueError, match="Invalid URL. Please include http:// or https://"):
-        analyze_domain('example.com', output_dir=TEST_DATA_DIR)
+        analyze_domain('example.com', output_dir=TEST_DATA_DIR, interaction_level='none')
 
 @patch('domain_analyzer.socket.getaddrinfo')
 def test_resolve_domain_to_ips(mock_getaddrinfo):
@@ -195,6 +202,63 @@ def test_capture_request_with_ipv6():
     
     assert len(domains) == 0
     assert '[2001:db8::1]' in direct_ips
+
+def test_detect_page_type():
+    # Mock driver for page type detection
+    mock_driver = MagicMock()
+    mock_driver.execute_script.return_value = {
+        'hasReact': False,
+        'hasVue': False,
+        'hasAngular': False,
+        'hasPushState': True,
+        'hasFetch': True
+    }
+    
+    # Test different page types
+    assert detect_page_type('https://google.com/search', mock_driver) == 'search_engine'
+    assert detect_page_type('https://youtube.com/watch', mock_driver) == 'streaming'
+    assert detect_page_type('https://facebook.com/profile', mock_driver) == 'social_media'
+    assert detect_page_type('https://amazon.com/products', mock_driver) == 'ecommerce'
+    assert detect_page_type('https://example.com/app', mock_driver) == 'spa'
+
+def test_simulate_scroll_interactions():
+    # Test that function exists and can be called
+    mock_driver = MagicMock()
+    # Configure return values properly
+    mock_driver.execute_script.return_value = 1000
+    
+    # Call the function with a mock driver
+    result = simulate_scroll_interactions(mock_driver, wait_time=0)
+    
+    # Just verify the function ran and made script calls
+    assert mock_driver.execute_script.called
+    # Result can be True or False based on execution, just check it's boolean
+    assert isinstance(result, bool)
+
+@patch('domain_analyzer.detect_page_type')
+@patch('domain_analyzer.simulate_scroll_interactions')
+@patch('domain_analyzer.simulate_search_interaction')
+@patch('domain_analyzer.simulate_hover_interactions')
+@patch('domain_analyzer.simulate_click_interactions')
+def test_simulate_user_interactions(
+    mock_click, mock_hover, mock_search, mock_scroll, mock_detect
+):
+    mock_driver = MagicMock()
+    mock_detect.return_value = 'generic'
+    mock_scroll.return_value = True
+    mock_search.return_value = True
+    mock_hover.return_value = True
+    mock_click.return_value = True
+    
+    # Test medium interaction level
+    result = simulate_user_interactions(mock_driver, 'https://example.com', 'medium')
+    assert result is True
+    
+    # Verify appropriate functions were called
+    mock_scroll.assert_called_once()
+    mock_search.assert_called_once()
+    mock_hover.assert_called_once()
+    mock_click.assert_called_once_with(mock_driver, max_clicks=2)
 
 if __name__ == '__main__':
     pytest.main()

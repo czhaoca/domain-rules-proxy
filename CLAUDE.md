@@ -20,8 +20,17 @@ pip install -r requirements.txt
 
 ### Running the Application
 ```bash
-# Run the main domain analyzer
+# Run with default medium interaction level
 python3 domain_analyzer.py
+
+# Run with specific URL and interaction level
+python3 domain_analyzer.py https://example.com --interaction-level high
+
+# Run without interactions for basic analysis
+python3 domain_analyzer.py https://example.com --interaction-level none
+
+# Show all available options
+python3 domain_analyzer.py --help
 ```
 
 ### Testing
@@ -40,8 +49,11 @@ pytest -v test/test_domain_analyzer.py
 - `domain_analyzer.py`: Main module containing the domain analysis logic
   - `analyze_domain()`: Primary function that orchestrates browser automation and domain extraction
   - `capture_request()`: Helper function that extracts domains from network requests
+  - `simulate_user_interactions()`: Enhanced user interaction simulation
+  - `detect_page_type()`: Smart page type detection for targeted interactions
   - Uses Selenium WebDriver with Chrome/Chromium in headless mode
   - Implements Chrome DevTools Protocol for network interception
+  - Supports configurable interaction levels: none, low, medium, high
 
 - `test/test_domain_analyzer.py`: Test suite with mocked WebDriver interactions
   - Uses pytest fixtures for setup/teardown and mocking

@@ -7,6 +7,11 @@ from urllib.parse import urlparse
 import time
 import os
 
+def capture_request(request, domains):
+    parsed_url = urlparse(request['url'])
+    if parsed_url.netloc:
+        domains.add(parsed_url.netloc)
+
 def analyze_domain(url, output_dir='data'):
     # Basic URL validation
     if not url.startswith(('http://', 'https://')):
@@ -30,13 +35,11 @@ def analyze_domain(url, output_dir='data'):
     domains = set()
 
     # Define a callback to capture network requests
-    def capture_request(request):
-        parsed_url = urlparse(request['url'])
-        if parsed_url.netloc:
-            domains.add(parsed_url.netloc)
+    def on_request(request):
+        capture_request(request, domains)
 
     # Add the listener
-    driver.on_request = capture_request
+    driver.on_request = on_request
 
     try:
         # Navigate to the URL

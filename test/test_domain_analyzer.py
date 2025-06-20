@@ -7,7 +7,7 @@ import shutil
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from domain_analyzer import analyze_domain
+from domain_analyzer import analyze_domain, capture_request
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 
@@ -42,20 +42,23 @@ def test_analyze_domain(mock_webdriver, mock_service, setup_teardown):
         {'url': 'https://ads.thirdparty.com/ad'},
     ]
 
-    # Simulate the capture_request function
-    def side_effect(cmd, params=None):
-        if cmd == "Network.enable":
-            return None
-        elif cmd == "Network.setRequestInterception":
-            for request in mock_requests:
-                mock_webdriver.on_request(request)
-            return None
+    # Create a set to store domains
+    domains = set()
 
-    mock_webdriver.execute_cdp_cmd.side_effect = side_effect
+    # Use the actual capture_request function
+    def side_effect(request):
+        capture_request(request, domains)
+
+    # Set up the mock driver's on_request attribute
+    mock_webdriver.on_request = side_effect
 
     # Run the analysis
     test_url = 'https://example.com'
-    domains = analyze_domain(test_url, output_dir=TEST_DATA_DIR)
+    result_domains = analyze_domain(test_url, output_dir=TEST_DATA_DIR)
+
+    # Simulate requests being processed
+    for request in mock_requests:
+        mock_webdriver.on_request(request)
 
     # Check if the file was created
     expected_filename = os.path.join(TEST_DATA_DIR, 'example.com_connected_domains.txt')
@@ -73,7 +76,7 @@ def test_analyze_domain(mock_webdriver, mock_service, setup_teardown):
     }
 
     assert set(content) == expected_domains
-    assert domains == expected_domains
+    assert result_domains == expected_domains
 
 def test_invalid_url(mock_webdriver, mock_service, setup_teardown):
     with pytest.raises(ValueError, match="Invalid URL. Please include http:// or https://"):

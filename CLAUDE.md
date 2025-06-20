@@ -36,10 +36,17 @@ python3 domain_analyzer.py --help
 ### Testing
 ```bash
 # Run all tests
-pytest test/test_domain_analyzer.py
+pytest test/
 
 # Run tests with verbose output
-pytest -v test/test_domain_analyzer.py
+pytest -v test/
+
+# Run specific test files
+pytest test/test_domain_analyzer.py
+pytest test/test_ip_resolution.py
+
+# Run tests with coverage
+pytest --cov=domain_analyzer test/
 ```
 
 ## Architecture
@@ -55,9 +62,15 @@ pytest -v test/test_domain_analyzer.py
   - Implements Chrome DevTools Protocol for network interception
   - Supports configurable interaction levels: none, low, medium, high
 
-- `test/test_domain_analyzer.py`: Test suite with mocked WebDriver interactions
+- `test/test_domain_analyzer.py`: Main test suite with mocked WebDriver interactions
   - Uses pytest fixtures for setup/teardown and mocking
   - Tests both valid URL processing and error handling
+  - Includes tests for IP resolution functions
+
+- `test/test_ip_resolution.py`: Dedicated test suite for IP resolution functionality
+  - Tests `resolve_domain_to_ips()` function with various scenarios
+  - Tests `resolve_domains_to_ips()` function for bulk domain resolution
+  - Covers IPv4/IPv6 resolution, DNS failures, and edge cases
 
 ### Key Dependencies
 

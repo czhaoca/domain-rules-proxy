@@ -1,16 +1,27 @@
-# Domain Analyzer
+# Domain Rules Proxy
 
 ## Overview
 
-Domain Analyzer is a Python script designed to run on Ubuntu systems. It analyzes all domains connected when visiting a specified website. Using Selenium with Chrome in headless mode, it captures network requests made during page load and saves the list of unique domains to a text file.
+Domain Rules Proxy is a network analysis tool designed to help network administrators identify all domains and IP addresses that need to be whitelisted in restrictive firewall environments. When clients need to access mainstream services (like Google, streaming platforms, or LLM services) through a whitelist-only network configuration, this tool captures all the required domains and IPs that must be allowed for full functionality.
+
+The tool uses Selenium WebDriver with Chrome in headless mode to simulate real browser behavior, capturing all network requests made during page load and interaction, then extracts unique domains and IP addresses for firewall rule creation.
+
+## Use Cases
+
+- **Corporate Firewall Configuration**: Identify domains needed for employee access to business-critical web services
+- **Educational Network Setup**: Configure student network access with minimal required whitelist rules
+- **Secure Environment Analysis**: Determine network dependencies for applications in high-security environments
+- **Proxy Rule Generation**: Create comprehensive forwarding rules for proxy servers in restricted networks
 
 ## Features
 
-- Runs on Ubuntu systems
-- Simulates browser behavior using Selenium with Chrome in headless mode
-- Captures all network requests during page load
-- Extracts unique domains from the captured requests
-- Saves results to a text file in the `data` folder
+- Runs on Ubuntu systems with Chrome/Chromium support
+- Simulates realistic browser behavior including JavaScript execution
+- Captures all network requests during page load and user interactions
+- Extracts unique domains and IP addresses from captured traffic
+- Generates whitelist-ready domain and IP lists
+- Supports batch analysis of multiple target websites
+- Exports results in firewall-friendly formats
 
 ## Requirements
 
@@ -23,15 +34,22 @@ Domain Analyzer is a Python script designed to run on Ubuntu systems. It analyze
 ## Project Structure
 
 ```
-ubuntu-domain-analyzer/
+domain-rules-proxy/
 │
-├── domain_analyzer.py
+├── domain_analyzer.py          # Main analysis script
 ├── README.md
 ├── requirements.txt
+├── CLAUDE.md                   # Development guidance
 ├── .gitignore
 │
-├── data/
-│   └── (output files will be saved here)
+├── data/                       # Analysis output files
+│   └── (domain and IP lists saved here)
+│
+├── dev/                        # Development resources
+│   └── llm/                    # Pre-analyzed LLM service domains
+│       ├── alphabet-services.txt
+│       ├── llm-services.txt
+│       └── streaming_services.txt
 │
 └── test/
     └── test_domain_analyzer.py
@@ -56,8 +74,8 @@ ubuntu-domain-analyzer/
 
 4. Clone the repository:
    ```
-   git clone https://github.com/yourusername/ubuntu-domain-analyzer.git
-   cd ubuntu-domain-analyzer
+   git clone https://github.com/czhaoca/domain-rules-proxy.git
+   cd domain-rules-proxy
    ```
 
 5. Create a virtual environment (optional but recommended):
@@ -73,14 +91,30 @@ ubuntu-domain-analyzer/
 
 ## Usage
 
-1. Run the script:
+### Basic Analysis
+
+1. Run the domain analyzer:
    ```
    python3 domain_analyzer.py
    ```
 
 2. Enter the full URL of the website you want to analyze when prompted (including `http://` or `https://`).
 
-3. The script will run the analysis and save the results in a text file named `[analyzed_domain]_connected_domains.txt` in the `data` folder.
+3. The script will simulate browser behavior and capture all network requests, then save results in the `data` folder:
+   - `[analyzed_domain]_connected_domains.txt` - List of all domains accessed
+   - Future versions will include IP addresses and firewall rule formats
+
+### Example Use Cases
+
+**Analyzing Google Search Access:**
+```bash
+python3 domain_analyzer.py
+# Enter: https://www.google.com
+# Output: google.com_connected_domains.txt with all required domains
+```
+
+**Corporate Network Setup:**
+Use the generated domain lists to configure firewall whitelist rules, ensuring employees can access necessary web services while maintaining network security.
 
 ## Testing
 

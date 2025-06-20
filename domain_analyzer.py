@@ -6,6 +6,7 @@ from webdriver_manager.core.os_manager import ChromeType
 from urllib.parse import urlparse
 import time
 import os
+import threading
 
 def capture_request(request, domains):
     parsed_url = urlparse(request['url'])
@@ -23,29 +24,39 @@ def analyze_domain(url, output_dir='data'):
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--enable-logging")
+    chrome_options.add_argument("--v=1")
 
     # Set up the WebDriver for Chromium
     service = Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
-    # Enable network interception
-    driver.execute_cdp_cmd("Network.enable", {})
-
     # Create a set to store the domains
     domains = set()
-
-    # Define a callback to capture network requests
-    def on_request(request):
-        capture_request(request, domains)
-
-    # Add the listener
-    driver.on_request = on_request
+    
+    # Enable CDP network domain
+    driver.execute_cdp_cmd("Network.enable", {})
+    
+    # Create a lock for thread-safe domain set operations
+    domains_lock = threading.Lock()
 
     try:
+        # Define event handler for network requests
+        def handle_request_will_be_sent(**kwargs):
+            request_url = kwargs.get('request', {}).get('url', '')
+            if request_url:
+                parsed_url = urlparse(request_url)
+                if parsed_url.netloc:
+                    with domains_lock:
+                        domains.add(parsed_url.netloc)
+        
+        # Add event listener for network requests
+        driver.add_cdp_listener("Network.requestWillBeSent", handle_request_will_be_sent)
+        
         # Navigate to the URL
         driver.get(url)
         
-        # Wait for the page to load (adjust the time as needed)
+        # Wait for the page to load and network requests to complete
         time.sleep(5)
 
         # Save the results

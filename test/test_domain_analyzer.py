@@ -34,31 +34,41 @@ def mock_service():
         yield mock_service
 
 def test_analyze_domain(mock_webdriver, mock_service, setup_teardown):
-    # Mock the requests captured by the WebDriver
+    # Mock the requests that will be captured by CDP
     mock_requests = [
-        {'url': 'https://example.com/page'},
-        {'url': 'https://cdn.example.com/style.css'},
-        {'url': 'https://api.example.com/data'},
-        {'url': 'https://ads.thirdparty.com/ad'},
+        {'request': {'url': 'https://example.com/page'}},
+        {'request': {'url': 'https://cdn.example.com/style.css'}},
+        {'request': {'url': 'https://api.example.com/data'}},
+        {'request': {'url': 'https://ads.thirdparty.com/ad'}},
     ]
 
-    # Create a set to store domains
-    domains = set()
-
-    # Use the actual capture_request function
-    def side_effect(request):
-        capture_request(request, domains)
-
-    # Set up the mock driver's on_request attribute
-    mock_webdriver.on_request = side_effect
+    # Mock the CDP listener functionality
+    cdp_listeners = {}
+    
+    def mock_add_cdp_listener(event, callback):
+        if event not in cdp_listeners:
+            cdp_listeners[event] = []
+        cdp_listeners[event].append(callback)
+    
+    def mock_execute_cdp_cmd(command, params):
+        pass  # Mock the CDP command execution
+    
+    # Mock driver.get to trigger CDP events when called
+    def mock_driver_get(url):
+        # Simulate CDP events being fired when navigating to URL
+        if "Network.requestWillBeSent" in cdp_listeners:
+            for request in mock_requests:
+                for callback in cdp_listeners["Network.requestWillBeSent"]:
+                    callback(**request)
+    
+    # Configure the mock driver
+    mock_webdriver.add_cdp_listener = mock_add_cdp_listener
+    mock_webdriver.execute_cdp_cmd = mock_execute_cdp_cmd
+    mock_webdriver.get = mock_driver_get
 
     # Run the analysis
     test_url = 'https://example.com'
     result_domains = analyze_domain(test_url, output_dir=TEST_DATA_DIR)
-
-    # Simulate requests being processed
-    for request in mock_requests:
-        mock_webdriver.on_request(request)
 
     # Check if the file was created
     expected_filename = os.path.join(TEST_DATA_DIR, 'example.com_connected_domains.txt')

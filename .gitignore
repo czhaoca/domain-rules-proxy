@@ -1,0 +1,21 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Test data
+/test/data/
+.pytest_cache/
+
+# Output data
+/data/
+
+# Virtual environment
+venv/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
